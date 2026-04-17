@@ -3,9 +3,11 @@ from datetime import datetime
 from fastapi import HTTPException
 from app.config import settings
 
-r = redis.from_url(settings.redis_url)
+r = redis.from_url(settings.redis_url) if settings.redis_url else None
 
 def check_budget(user_id: str, cost_to_add: float = 0.0):
+    if not r:
+        return True
     # Determine current month for monthly spending
     month_key = datetime.now().strftime("%Y-%m")
     key = f"budget:{user_id}:{month_key}"

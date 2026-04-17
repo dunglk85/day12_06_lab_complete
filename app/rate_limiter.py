@@ -4,10 +4,12 @@ import redis
 from fastapi import HTTPException
 from app.config import settings
 
-# Initialize Redis connection
-r = redis.from_url(settings.redis_url)
+# Initialize Redis connection (fallback to None if no URL)
+r = redis.from_url(settings.redis_url) if settings.redis_url else None
 
 def check_rate_limit(user_id: str):
+    if not r:
+        return # Skip rate limit if Redis is not configured
     now = time.time()
     window_start = now - 60  # 60s sliding window
     key = f"rate_limit:{user_id}"

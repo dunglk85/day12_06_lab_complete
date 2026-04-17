@@ -86,7 +86,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
     allow_methods=["GET", "POST"],
-    allow_headers=["Authorization", "Content-Type", "X-API-Key"],
+    allow_headers=["X-API-Key", "Content-Type"],
 )
 
 @app.middleware("http")
@@ -138,18 +138,12 @@ def root():
         "version": settings.app_version,
         "environment": settings.environment,
         "endpoints": {
-            "token": "GET /token (requires X-API-Key)",
-            "ask": "POST /ask (requires API Key or JWT)",
+            "ask": "POST /ask (requires X-API-Key)",
             "health": "GET /health",
             "ready": "GET /ready",
         },
     }
 
-@app.get("/token", tags=["Auth"])
-def get_token(user_id: str = Depends(verify_api_key)):
-    """Đổi API Key lấy JWT token có thời hạn (1h)."""
-    token = create_access_token(user_id)
-    return {"access_token": token, "token_type": "bearer"}
 
 
 @app.post("/ask", response_model=AskResponse, tags=["Agent"])

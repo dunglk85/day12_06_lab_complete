@@ -32,18 +32,6 @@ async def verify_jwt(credentials: HTTPAuthorizationCredentials = Depends(securit
     except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Could not validate credentials")
 
-def get_current_user(
-    x_api_key: str = Header(None),
-    token: HTTPAuthorizationCredentials = Depends(HTTPBearer(auto_error=False))
-):
-    # Support both API Key and JWT
-    if x_api_key:
-        return verify_api_key(x_api_key)
-    if token:
-        try:
-            payload = jwt.decode(token.credentials, settings.jwt_secret, algorithms=["HS256"])
-            return payload.get("sub")
-        except:
-            raise HTTPException(status_code=401, detail="Invalid session token")
-    
-    raise HTTPException(status_code=401, detail="Authentication required")
+def get_current_user(x_api_key: str = Header(None)):
+    """Chỉ cho phép authenticate bằng API Key."""
+    return verify_api_key(x_api_key)

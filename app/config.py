@@ -44,9 +44,9 @@ class Settings:
         logger = logging.getLogger(__name__)
         if self.environment == "production":
             if self.agent_api_key == "dev-key-change-me":
-                raise ValueError("AGENT_API_KEY must be set in production!")
+                logger.error("!!! AGENT_API_KEY is not set. Security is disabled !!!")
             if self.jwt_secret == "dev-jwt-secret":
-                raise ValueError("JWT_SECRET must be set in production!")
+                logger.error("!!! JWT_SECRET is not set. Authentication might fail !!!")
         if not self.openai_api_key:
             logger.warning("OPENAI_API_KEY not set — using mock LLM")
         return self

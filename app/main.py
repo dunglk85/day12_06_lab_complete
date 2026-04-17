@@ -33,8 +33,13 @@ from app.auth import get_current_user, create_access_token, verify_api_key
 from app.rate_limiter import check_rate_limit
 from app.cost_guard import check_budget
 
-# Mock LLM (thay bằng OpenAI/Anthropic khi có API key)
-from utils.mock_llm import ask as llm_ask
+# AI Agent (thay cho mock_llm)
+from agent.agent import graph as agent_graph
+
+def llm_ask(question: str) -> str:
+    """Wrapper to call the agent graph."""
+    result = agent_graph.invoke({"messages": [("human", question)]})
+    return result["messages"][-1].content
 
 # ─────────────────────────────────────────────────────────
 # Logging — JSON structured
@@ -243,22 +248,3 @@ if __name__ == "__main__":
     )
 
 
-# ─────────────────────────────────────────────────────────
-# Graceful Shutdown
-# ─────────────────────────────────────────────────────────
-def _handle_signal(signum, _frame):
-    logger.info(json.dumps({"event": "signal", "signum": signum}))
-
-signal.signal(signal.SIGTERM, _handle_signal)
-
-
-if __name__ == "__main__":
-    logger.info(f"Starting {settings.app_name} on {settings.host}:{settings.port}")
-    logger.info(f"API Key: {settings.agent_api_key[:4]}****")
-    uvicorn.run(
-        "app.main:app",
-        host=settings.host,
-        port=settings.port,
-        reload=settings.debug,
-        timeout_graceful_shutdown=30,
-    )
